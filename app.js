@@ -50,11 +50,11 @@ const store = MongoStore.create({
 
 store.on("error", () => {
   console.log("ERROR IN MONGO SESSION STORE", err);
-})
+});
 
 const sesionOptions = {
   store,
-  secret:  process.env.SECRET,
+  secret: process.env.SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -63,10 +63,6 @@ const sesionOptions = {
     httpOnly: true,
   },
 };
-
-app.get("/", (req, res) => {
-  res.redirect("/listings");
-});
 
 app.use(session(sesionOptions));
 app.use(flash());
@@ -93,6 +89,10 @@ app.use((req, res, next) => {
 //   let regUser = await User.register(fakeuser, "hello");
 //   res.send(regUser);
 // });
+
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
