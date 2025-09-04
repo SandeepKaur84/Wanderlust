@@ -1,27 +1,37 @@
-const mongoose =  require("mongoose");
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
+const mongoose = require("mongoose");
 const initdata = require("./data.js");
 const Listing = require("../models/listing.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
-main().then(() => {
-    console.log("Connected to DB");
-}).catch((err) => {
-    console.log(err);
-})
+const dbUrl = process.env.ATLASDB_URL;
 
 async function main() {
-    await mongoose.connect(MONGO_URL);
+  await mongoose.connect(dbUrl);
+  console.log("✅ Connected to DB for seeding:", dbUrl);
 }
+
 
 const initDB = async () => {
-    await Listing.deleteMany({});
-    initdata.data = initdata.data.map((obj) => ({
-        ...obj,
-        owner: "68b6a4975b256b3a425b278a",
-    }));
-    await Listing.insertMany(initdata.data);
-    console.log("Data was initialized");
-}
+  await Listing.deleteMany({});
+  console.log("🗑️ Old data deleted");
 
-initDB();
+  initdata.data = initdata.data.map((obj) => ({
+    ...obj,
+    owner: "68b736f9de128cfcaf1cf358",
+  }));
+
+const res = await Listing.insertMany(initdata.data);
+console.log(`🌱 Data was initialized: Inserted ${res.length} documents`);
+
+};
+
+main()
+  .then(initDB)
+  .then(() => mongoose.connection.close())
+  .catch((err) => {
+    console.error("❌ Error during seeding:", err);
+    mongoose.connection.close();
+  });
